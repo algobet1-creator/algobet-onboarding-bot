@@ -11,9 +11,9 @@ import { OnboardingStep } from '../types';
 import { logger } from '../utils/logger';
 
 export function registerJoinRequestHandler(bot: Telegraf<BotContext>): void {
-  // @ts-expect-error — Telegraf typings don't yet expose chat_join_request
+
   bot.on('chat_join_request', async (ctx) => {
-    const request = (ctx.update as Record<string, unknown>)
+    const request = (ctx.update as unknown as Record<string, unknown>)
       .chat_join_request as {
       from: { id: number; username?: string; first_name: string };
       chat: { id: number };
