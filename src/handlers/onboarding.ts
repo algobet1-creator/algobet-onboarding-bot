@@ -31,19 +31,23 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
 
     await updateUserStep(telegramId, OnboardingStep.STATEMENT);
 
-    // Edit the original message to remove buttons (clean UX)
+    // Edit the original message to remove buttons
     await ctx.editMessageText('🔞 Είσαι 18 ετών ή μεγαλύτερος; ✅');
 
     // Step 3 — Declaration / statement
-    await ctx.telegram.sendMessage(
-      telegramId,
-      '📋 *Δήλωση Υπεύθυνης Χρήσης*\n\n' +
-        '_Δηλώνω υπεύθυνα ότι είμαι τουλάχιστον 18 ετών και ότι οι πληροφορίες που παρέχω είναι ακριβείς._',
-      {
-        parse_mode: 'Markdown',
-        ...statementKeyboard,
-      },
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        telegramId,
+        '📋 *Δήλωση Υπεύθυνης Χρήσης*\n\n' +
+          '_Δηλώνω υπεύθυνα ότι είμαι τουλάχιστον 18 ετών και ότι οι πληροφορίες που παρέχω είναι ακριβείς._',
+        {
+          parse_mode: 'Markdown',
+          ...statementKeyboard,
+        },
+      );
+    } catch (err) {
+      logger.error(`Failed to send statement message to ${telegramId}:`, err);
+    }
   });
 
   bot.action('age_no', async (ctx) => {
@@ -54,12 +58,16 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
     await setDeclinedAge(telegramId);
     await ctx.editMessageText('🔞 Είσαι 18 ετών ή μεγαλύτερος; ❌');
 
-    await ctx.telegram.sendMessage(
-      telegramId,
-      '⛔ *Πρόσβαση Απορρίφθηκε*\n\n' +
-        'Η πρόσβαση δεν είναι εφικτή για ανήλικους.',
-      { parse_mode: 'Markdown' },
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        telegramId,
+        '⛔ *Πρόσβαση Απορρίφθηκε*\n\n' +
+          'Η πρόσβαση δεν είναι εφικτή για ανήλικους.',
+        { parse_mode: 'Markdown' },
+      );
+    } catch (err) {
+      logger.error(`Failed to send rejection message to ${telegramId}:`, err);
+    }
 
     logger.info(`User ${telegramId} rejected at age gate.`);
   });
@@ -81,15 +89,19 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
     );
 
     // Step 5 — Legal notice
-    await ctx.telegram.sendMessage(
-      telegramId,
-      '⚖️ *Νομική Ειδοποίηση*\n\n' +
-        'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα.',
-      {
-        parse_mode: 'Markdown',
-        ...legalKeyboard,
-      },
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        telegramId,
+        '⚖️ *Νομική Ειδοποίηση*\n\n' +
+          'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα.',
+        {
+          parse_mode: 'Markdown',
+          ...legalKeyboard,
+        },
+      );
+    } catch (err) {
+      logger.error(`Failed to send legal message to ${telegramId}:`, err);
+    }
   });
 
   bot.action('statement_cancel', async (ctx) => {
@@ -102,10 +114,14 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       { parse_mode: 'Markdown' },
     );
 
-    await ctx.telegram.sendMessage(
-      telegramId,
-      '❌ Η διαδικασία ακυρώθηκε. Εάν θέλεις να ξαναδοκιμάσεις, πάτα /start.',
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        telegramId,
+        '❌ Η διαδικασία ακυρώθηκε. Εάν θέλεις να ξαναδοκιμάσεις, πάτα /start.',
+      );
+    } catch (err) {
+      logger.error(`Failed to send cancellation message to ${telegramId}:`, err);
+    }
 
     logger.info(`User ${telegramId} cancelled at statement step.`);
   });
@@ -120,8 +136,6 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
     const user = await getUserByTelegramId(telegramId);
     if (!user || user.onboarding_step !== OnboardingStep.LEGAL) return;
 
-    // Step 4 data is automatic — we already have username/first_name from join request
-    // Step 6 — Finalise record
     await confirmAgeAndLegal(telegramId);
 
     await ctx.editMessageText(
@@ -130,12 +144,16 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
     );
 
     // Notify user
-    await ctx.telegram.sendMessage(
-      telegramId,
-      '✅ *Αίτημα Καταχωρήθηκε!*\n\n' +
-        'Το αίτημά σου καταχωρήθηκε επιτυχώς! Θα ενημερωθείς μόλις εγκριθεί από τον διαχειριστή. 🙏',
-      { parse_mode: 'Markdown' },
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        telegramId,
+        '✅ *Αίτημα Καταχωρήθηκε!*\n\n' +
+          'Το αίτημά σου καταχωρήθηκε επιτυχώς! Θα ενημερωθείς μόλις εγκριθεί από τον διαχειριστή. 🙏',
+        { parse_mode: 'Markdown' },
+      );
+    } catch (err) {
+      logger.error(`Failed to send confirmation to ${telegramId}:`, err);
+    }
 
     // Notify admin
     const adminId = Number(process.env.ADMIN_CHAT_ID);
@@ -150,10 +168,14 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
         `✅ Ηλικία επιβεβαιώθηκε: Ναι\n` +
         `✅ Νομική δήλωση: Ναι`;
 
-      await ctx.telegram.sendMessage(adminId, message, {
-        parse_mode: 'Markdown',
-        ...adminApprovalKeyboard(telegramId),
-      });
+      try {
+        await ctx.telegram.sendMessage(adminId, message, {
+          parse_mode: 'Markdown',
+          ...adminApprovalKeyboard(telegramId),
+        });
+      } catch (err) {
+        logger.error(`Failed to notify admin about user ${telegramId}:`, err);
+      }
     }
 
     logger.info(
