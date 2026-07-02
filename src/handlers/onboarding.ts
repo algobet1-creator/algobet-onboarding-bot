@@ -31,7 +31,7 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
 
     await updateUserStep(telegramId, OnboardingStep.STATEMENT);
 
-    // Edit the original message to remove buttons
+    // Edit the original message to remove buttons (clean UX)
     await ctx.editMessageText('🔞 Είσαι 18 ετών ή μεγαλύτερος; ✅');
 
     // Step 3 — Declaration / statement
@@ -39,7 +39,7 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       await ctx.telegram.sendMessage(
         telegramId,
         '📋 *Δήλωση Υπεύθυνης Χρήσης*\n\n' +
-          '_Δηλώνω υπεύθυνα ότι είμαι τουλάχιστον 18 ετών και ότι οι πληροφορίες που παρέχω είναι ακριβείς._',
+        '_Δηλώνω υπεύθυνα ότι είμαι τουλάχιστον 18 ετών και ότι οι πληροφορίες που παρέχω είναι ακριβείς._',
         {
           parse_mode: 'Markdown',
           ...statementKeyboard,
@@ -47,6 +47,7 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       );
     } catch (err) {
       logger.error(`Failed to send statement message to ${telegramId}:`, err);
+      await ctx.answerCbQuery('Πάτα "Start" στο bot για να συνεχίσεις!', { show_alert: true });
     }
   });
 
@@ -62,7 +63,7 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       await ctx.telegram.sendMessage(
         telegramId,
         '⛔ *Πρόσβαση Απορρίφθηκε*\n\n' +
-          'Η πρόσβαση δεν είναι εφικτή για ανήλικους.',
+        'Η πρόσβαση δεν είναι εφικτή για ανήλικους.',
         { parse_mode: 'Markdown' },
       );
     } catch (err) {
@@ -93,14 +94,15 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       await ctx.telegram.sendMessage(
         telegramId,
         '⚖️ *Νομική Ειδοποίηση*\n\n' +
-          'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα.',
+        'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα.',
         {
           parse_mode: 'Markdown',
           ...legalKeyboard,
         },
       );
     } catch (err) {
-      logger.error(`Failed to send legal message to ${telegramId}:`, err);
+      logger.error(`Failed to send legal notice to ${telegramId}:`, err);
+      await ctx.answerCbQuery('Σφάλμα: Πάτα Start!', { show_alert: true });
     }
   });
 
@@ -148,7 +150,7 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       await ctx.telegram.sendMessage(
         telegramId,
         '✅ *Αίτημα Καταχωρήθηκε!*\n\n' +
-          'Το αίτημά σου καταχωρήθηκε επιτυχώς! Θα ενημερωθείς μόλις εγκριθεί από τον διαχειριστή. 🙏',
+        'Το αίτημά σου καταχωρήθηκε επιτυχώς! Θα ενημερωθείς μόλις εγκριθεί από τον διαχειριστή. 🙏',
         { parse_mode: 'Markdown' },
       );
     } catch (err) {
