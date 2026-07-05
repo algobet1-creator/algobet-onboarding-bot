@@ -31,10 +31,8 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
 
     await updateUserStep(telegramId, OnboardingStep.STATEMENT);
 
-    // Edit the original message to remove buttons (clean UX)
     await ctx.editMessageText('🔞 Είσαι 18 ετών ή μεγαλύτερος; ✅');
 
-    // Step 3 — Declaration / statement
     try {
       await ctx.telegram.sendMessage(
         telegramId,
@@ -89,12 +87,11 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       { parse_mode: 'Markdown' },
     );
 
-    // Step 5 — Legal notice
     try {
       await ctx.telegram.sendMessage(
         telegramId,
         '⚖️ *Νομική Ειδοποίηση*\n\n' +
-        'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα.',
+        'Οποιαδήποτε ψευδής δήλωση σχετικά με την ηλικία ενδέχεται να οδηγήσει σε _οριστική αφαίρεση_ από την κοινότητα και όλες τις νόμιμες διαδικασίες εάν κριθεί απαραίτητο.',
         {
           parse_mode: 'Markdown',
           ...legalKeyboard,
@@ -145,13 +142,20 @@ export function registerOnboardingHandlers(bot: Telegraf<BotContext>): void {
       { parse_mode: 'Markdown' },
     );
 
-    // Notify user
+    // Notify user with the Channel Link Button
     try {
       await ctx.telegram.sendMessage(
         telegramId,
         '✅ *Αίτημα Καταχωρήθηκε!*\n\n' +
-        'Το αίτημά σου καταχωρήθηκε επιτυχώς! Θα ενημερωθείς μόλις εγκριθεί από τον διαχειριστή. 🙏',
-        { parse_mode: 'Markdown' },
+        'Το αίτημά σου καταχωρήθηκε επιτυχώς! Πάτησε το παρακάτω κουμπί για να μεταφερθείς στο κανάλι και να κάνεις "Αίτημα Εισόδου":',
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🔗 Αίτημα Εισόδου στο Κανάλι', url: 'https://t.me/+FWxREWSkJ7ZkNjY0' }]
+            ]
+          }
+        },
       );
     } catch (err) {
       logger.error(`Failed to send confirmation to ${telegramId}:`, err);
